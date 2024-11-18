@@ -454,8 +454,9 @@ export default {
                                 break;
                             }
                             // currently commented to allow new lines in mixed-mode
-                            // case 'Enter' :
-                            //     // e.preventDefault(); // solves Chrome bug - http://stackoverflow.com/a/20398191/104380
+                            // ALIDA UPDATE: Preventing default on enter
+                            case 'Enter' :
+                                e.preventDefault(); // solves Chrome bug - http://stackoverflow.com/a/20398191/104380
                         }
 
                         return true
@@ -623,15 +624,14 @@ export default {
 
                     match = rangeText.match( _s.pattern )
 
-                    if( match )
-                        // tag string, example: "@aaa ccc"
-                        tag = rangeText.slice( rangeText.lastIndexOf(match[match.length-1]) )
+                    // ALIDA UPDATE
+                    tag = match ? rangeText.slice( rangeText.lastIndexOf(match[match.length-1]) + 1 ) : rangeText
 
                     if( tag ){
                         this.state.actions.ArrowLeft = false // start fresh, assuming the user did not (yet) used any arrow to move the caret
                         this.state.tag = {
-                            prefix : tag.match(_s.pattern)[0],
-                            value  : tag.replace(_s.pattern, ''), // get rid of the prefix
+                            // ALIDA UPDATE: removing addition of prefix here
+                            value  : tag
                         }
                         this.state.tag.baseOffset = selection.baseOffset - this.state.tag.value.length
 
@@ -644,8 +644,9 @@ export default {
                             this.dropdown.hide()
                             return
                         }
-
-                        showSuggestions = this.state.tag.value.length >= _s.dropdown.enabled
+                        
+                        // ALIDA UPDATE: Showing suggestions when no token has been selected
+                        showSuggestions = this.state.tag.value.length >= _s.dropdown.enabled || this.value.length == 0
 
                         // When writing something that might look like a tag (an email address) but isn't one - it is unwanted
                         // the suggestions dropdown be shown, so the user can close it (in any way), and while continue typing,
@@ -1072,7 +1073,8 @@ export default {
                         // and it is the first node in a new line
                         if( addedNode.previousSibling && addedNode.previousSibling.nodeName == 'BR' ){
                             // allows placing the caret just before the tag, when the tag is the first node in that line
-                            addedNode.previousSibling.replaceWith('\n' + ZERO_WIDTH_CHAR)
+                            // ALIDA UPDATE: removing line break before zero width char
+                            addedNode.previousSibling.replaceWith(ZERO_WIDTH_CHAR)
 
                             let nextNode = addedNode.nextSibling, anythingAfterNode = '';
 

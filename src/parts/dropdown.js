@@ -180,9 +180,10 @@ export default {
 
         // if the user closed the dropdown (in mix-mode) while a potential tag was detected, flag the current tag
         // so the dropdown won't be shown on following user input for that "tag"
-        if( this.state.tag && this.state.tag.value.length ){
-            this.state.flaggedTags[this.state.tag.baseOffset] = this.state.tag
-        }
+        // ALIDA UPDATE: no need for storing the rejected coincidences
+        // if( this.state.tag && this.state.tag.value.length ){
+        //     this.state.flaggedTags[this.state.tag.baseOffset] = this.state.tag
+        // }
 
         this.trigger("dropdown:hide", dropdown)
 

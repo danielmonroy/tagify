@@ -438,7 +438,8 @@ Tagify.prototype = {
         // }
     },
 
-    /** https://stackoverflow.com/a/59156872/104380
+    /** THIS ONLY WORKS FOR TEXT NODES !!
+     * https://stackoverflow.com/a/59156872/104380
      * @param {Boolean} start indicating where to place it (start or end of the node)
      * @param {Object}  node  DOM node to place the caret at
      */
@@ -454,7 +455,7 @@ Tagify.prototype = {
             return true
         }
 
-        try{
+        try {
             if( sel.rangeCount >= 1 ){
                 ['Start', 'End'].forEach(pos =>
                     sel.getRangeAt(0)["set" + pos](node, start ? start : node.length)
@@ -1198,7 +1199,7 @@ Tagify.prototype = {
     replaceTextWithNode( newWrapperNode, strToReplace ){
         if( !this.state.tag && !strToReplace ) return;
 
-        strToReplace = strToReplace || this.state.tag.prefix + this.state.tag.value;
+        strToReplace = strToReplace || this.state.tag.value;
         var idx, nodeToReplace,
             selection = this.state.selection || window.getSelection(),
             nodeAtCaret = selection.anchorNode,
@@ -1438,23 +1439,25 @@ Tagify.prototype = {
     addMixTags( tagsData ){
         tagsData = this.normalizeTags(tagsData);
 
+        return this.prefixedTextToTag(tagsData[0])
+        // ALIDA UPDATE: No need for remaining code
         // flow for creating custom tags which aren't a part of the whitelist
-        if( tagsData[0].prefix || this.state.tag ){
-            return this.prefixedTextToTag(tagsData[0])
-        }
+        // Checking if state.tag value is empty in order to not call prefixed operation
+        // if( tagsData[0].prefix || (this.state.tag && this.state.tag.value !== "") ){
+        // }
 
-        var frag = document.createDocumentFragment()
+        // var frag = document.createDocumentFragment()
 
-        tagsData.forEach(tagData => {
-            const newTagNode = this.prepareNewTagNode(tagData)
-            frag.appendChild(newTagNode.tagElm)
-            this.insertAfterTag(newTagNode.tagElm)
-            this.postProcessNewTagNode(newTagNode.tagElm, newTagNode.tagData)
-        })
+        // tagsData.forEach(tagData => {
+        //     const newTagNode = this.prepareNewTagNode(tagData)
+        //     frag.appendChild(newTagNode.tagElm)
+        //     this.insertAfterTag(newTagNode.tagElm)
+        //     this.postProcessNewTagNode(newTagNode.tagElm, newTagNode.tagData)
+        // })
 
-        this.appendMixTags(frag)
+        // this.appendMixTags(frag)
 
-        return frag.children
+        // return frag.children
     },
 
     appendMixTags( node ) {
@@ -1501,6 +1504,8 @@ Tagify.prototype = {
 
         setTimeout(()=> tagElm.classList.add(this.settings.classNames.tagNoAnimation), 300)
 
+        // ALIDA UPDATE: Adding event to track latest added tags
+        this.trigger('add', {index:this.getTagIdx(newTag.tagData), data:newTag.tagData})
         this.update()
 
         if( !createdFromDelimiters ) {
@@ -1514,6 +1519,9 @@ Tagify.prototype = {
         this.state.tag = null
 
         this.postProcessNewTagNode(tagElm, newTag.tagData)
+        // ALIDA UPDATE: refocus after selecting tag and checking if close on select
+        this.DOM.input.focus()
+        !_s.dropdown.closeOnSelect && this.dropdown.show()
 
         return tagElm
     },
@@ -1652,7 +1660,11 @@ Tagify.prototype = {
                 function removeNode( tag ){
                     if( !tag.node.parentNode ) return
 
+                    var nodeIdx = Array.prototype.indexOf.call(tag.node.parentNode.childNodes, tag.node);
+                    var adjacentTextNode = tag.node.parentNode.childNodes[nodeIdx + 1].nodeType == 3 ? tag.node.parentNode.childNodes[nodeIdx + 1] : null
+
                     tag.node.parentNode.removeChild(tag.node)
+                    if (adjacentTextNode && _s.removeAdjacentText) adjacentTextNode.parentNode.removeChild(adjacentTextNode);
 
                     if( !silent ){
                         // this.removeValueById(tagData.__uid)

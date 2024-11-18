@@ -14,7 +14,6 @@ export default {
                     ${_s.mode === 'select' ? "spellcheck='false'" : ''}
                     tabIndex="-1">
                     ${this.settings.templates.input.call(this)}
-                ${ZERO_WIDTH_UNICODE_CHAR}
         </tags>`
     },
 

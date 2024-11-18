@@ -20,6 +20,7 @@ export default {
     backspace           : true,           // false / true / "edit"
     skipInvalid         : false,          // If `true`, do not add invalid, temporary, tags before automatically removing them
     pasteAsTags         : true,           // automatically converts pasted text into tags. if "false", allows for further text editing
+    removeAdjacentText  : true,           // ALIDA UPDATE: removing adjacent text to tag on tag remove
 
     editTags            : {
         clicks      : 2,                  // clicks to enter "edit-mode": 1 for single click. any other value is considered as double-click
